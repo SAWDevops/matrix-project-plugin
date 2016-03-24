@@ -23,7 +23,7 @@
  */
 package hudson.matrix;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.*;
 import hudson.cli.CLICommandInvoker;
 import hudson.cli.DeleteBuildsCommand;
 import hudson.model.Cause;
@@ -43,9 +43,6 @@ import org.jvnet.hudson.test.SingleFileSCM;
 import org.jvnet.hudson.test.UnstableBuilder;
 import org.jvnet.hudson.test.recipes.LocalData;
 
-import com.gargoylesoftware.htmlunit.html.HtmlTable;
-import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
-import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import hudson.FilePath;
 
 import org.jvnet.hudson.test.Issue;
@@ -216,7 +213,7 @@ public class MatrixProjectTest {
 
     void assertRectangleTable(MatrixProject p) throws Exception {
         HtmlPage html = j.createWebClient().getPage(p);
-        HtmlTable table = html.selectSingleNode("id('matrix')/table");
+        HtmlTable table = DomNodeUtil.selectSingleNode(html,"id('matrix')/table");
 
         // remember cells that are extended from rows above.
         Map<Integer,Integer> rowSpans = new HashMap<Integer,Integer>();

@@ -25,18 +25,21 @@ package hudson.matrix;
 
 import hudson.model.Job;
 import hudson.tasks.LogRotator;
+import hudson.util.RunList;
+import jenkins.model.Jenkins;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * {@link LogRotator} for {@link MatrixConfiguration},
  * which discards the builds if and only if it's discarded
  * in the parent.
- *
- * <p>
+ * <p/>
+ * <p/>
  * Because of the serialization compatibility, we can't easily
- * refactor {@link LogRotator} into a contract and an implementation. 
+ * refactor {@link LogRotator} into a contract and an implementation.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -47,7 +50,7 @@ final class LinkedLogRotator extends LogRotator {
 
     /**
      * @deprecated since 1.369
-     *     Use {@link #LinkedLogRotator(int, int)}
+     * Use {@link #LinkedLogRotator(int, int)}
      */
     LinkedLogRotator() {
         super(-1, -1, -1, -1);
@@ -57,6 +60,10 @@ final class LinkedLogRotator extends LogRotator {
     public void perform(Job _job) throws IOException, InterruptedException {
         // Let superclass handle clearing artifacts, if configured:
         super.perform(_job);
+        if (!(_job instanceof MatrixConfiguration)) {
+            LOGGER.log(Level.SEVERE, "Log rotator got a job with a wrong type. {0} of {1}",
+                    new Object[]{_job.getFullName(), _job.getClass()});
+        }
         MatrixConfiguration job = (MatrixConfiguration) _job;
 
         // copy it to the array because we'll be deleting builds as we go.
@@ -67,7 +74,19 @@ final class LinkedLogRotator extends LogRotator {
             }
         }
 
-        if(!job.isActiveConfiguration() && job.getLastBuild()==null) {
+        final Jenkins jenkins = Jenkins.getInstance();
+
+        if (!job.isActiveConfiguration() && job.getLastBuild() == null) {
+
+            // added to prevent concurrent matrix build aborts (JENKINS-13972)
+            if (jenkins != null && jenkins.getQueue() != null) {
+
+                for (hudson.model.Queue.Item item : jenkins.getQueue().getItems()) {
+                    if (item.task.getFullDisplayName().equals(job.getFullDisplayName())) {
+                        return;
+                    }
+                }
+            }
             LOGGER.fine("Deleting "+job.getFullDisplayName()+" because the configuration is inactive and there's no builds");
             job.delete();
         }

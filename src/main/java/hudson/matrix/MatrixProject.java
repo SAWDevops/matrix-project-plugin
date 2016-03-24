@@ -36,27 +36,9 @@ import hudson.XmlFile;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.matrix.MatrixBuild.MatrixBuildExecution;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildableItemWithBuildWrappers;
-import hudson.model.DependencyGraph;
-import hudson.model.Descriptor;
+import hudson.model.*;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Item;
-import hudson.model.ItemGroup;
-import hudson.model.Items;
-import hudson.model.JDK;
-import hudson.model.Job;
-import hudson.model.Label;
-import hudson.model.Node;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Queue.FlyweightTask;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.SCMedItem;
-import hudson.model.Saveable;
-import hudson.model.TopLevelItem;
 import hudson.slaves.WorkspaceList;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildWrapper;
@@ -515,9 +497,21 @@ public class MatrixProject extends AbstractProject<MatrixProject,MatrixBuild> im
         super.logRotate();
         // perform the log rotation of inactive configurations to make sure
         // their logs get eventually discarded
+        final Jenkins jenkins = Jenkins.getInstance();
+
         for (MatrixConfiguration config : configurations.values()) {
-            if(!config.isActiveConfiguration())
+            if(!config.isActiveConfiguration()){
+
+                // added to prevent concurrent matrix build aborts (JENKINS-13972)
+                if(jenkins !=null && jenkins.getQueue()!= null){
+                    for (Queue.Item item : jenkins.getQueue().getItems()) {
+                        if (item.task.getFullDisplayName().equals(config.getFullDisplayName())) {
+                            return;
+                        }
+                    }
+                }
                 config.logRotate();
+            }
         }
     }
 
