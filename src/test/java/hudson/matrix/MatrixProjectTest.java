@@ -88,8 +88,6 @@ import java.util.Map;
 import java.util.Set;
 import jenkins.model.Jenkins;
 import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-import org.junit.Ignore;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -415,7 +413,6 @@ public class MatrixProjectTest {
      * Verifies that the concurrent build feature works, and makes sure
      * that each gets its own unique workspace.
      */
-    @Ignore("TODO JENKINS-26739 known to fail until https://github.com/jenkinsci/jenkins/pull/1592")
     @Test
     public void testConcurrentBuild() throws Exception {
         j.jenkins.setNumExecutors(10);
