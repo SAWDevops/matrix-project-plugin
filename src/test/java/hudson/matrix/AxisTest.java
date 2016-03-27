@@ -27,7 +27,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
-import com.gargoylesoftware.htmlunit.html.HtmlFormUtil;
 import hudson.model.JDK;
 
 import org.hamcrest.collection.IsEmptyCollection;
@@ -59,7 +58,7 @@ public class AxisTest {
 
     @Test
     public void submitEmptyAxisName() throws Exception {
-        wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        wc.setThrowExceptionOnFailingStatusCode(false);
 
         final String expectedMsg = "Matrix axis name '' is invalid: Axis name can not be empty";
         assertFailedWith(expectedMsg, withName("", "User-defined Axis"));
@@ -69,7 +68,7 @@ public class AxisTest {
 
     @Test
     public void submitInvalidAxisName() throws Exception {
-        wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        wc.setThrowExceptionOnFailingStatusCode(false);
 
         String expectedMsg = "Matrix axis name 'a,b' is invalid: ‘,’ is an unsafe character";
         assertFailedWith(expectedMsg, withName("a,b", "User-defined Axis"));
@@ -84,7 +83,7 @@ public class AxisTest {
 
     @Test
     public void submitInvalidAxisValue() throws Exception {
-        wc.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        wc.setThrowExceptionOnFailingStatusCode(false);
 
         HtmlForm form = addAxis("User-defined Axis");
         form.getInputByName("_.name").setValueAttribute("a_name");
@@ -136,7 +135,7 @@ public class AxisTest {
     private HtmlForm addAxis(String axis) throws Exception {
         HtmlPage page = wc.getPage(p, "configure");
         HtmlForm form = page.getFormByName("config");
-        HtmlFormUtil.getButtonByCaption(form, "Add axis").click();
+        form.getButtonByCaption("Add axis").click();
         page.getAnchorByText(axis).click();
         return form;
     }

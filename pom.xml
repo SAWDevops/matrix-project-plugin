@@ -4,9 +4,10 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>1.609</version>
+        <relativePath></relativePath>
     </parent>
     <artifactId>matrix-project</artifactId>
-    <version>1.6</version>
+    <version>1.6.1</version>
     <packaging>hpi</packaging>
     <name>Matrix Project Plugin</name>
     <description>Multi-configuration (matrix) project type.</description>
